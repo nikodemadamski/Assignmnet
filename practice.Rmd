@@ -123,4 +123,4 @@ ggplot(data=join, aes(x=count_clicks$clicks, y=count_impressions$impressions)) +
 
 ```
 
-sadly i count compare the two due to all my time spent studying for exams, i know excuses are excuses but apologies for the rushed test
+sadly i couldn't compare the two due to my time spent studying for exams, i know excuses are excuses but apologies for the rushed assignment.
