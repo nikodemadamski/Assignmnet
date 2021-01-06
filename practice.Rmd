@@ -1,0 +1,126 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+#Packages
+```{r}
+library(tidyverse)
+library(tibble)
+library(ggplot2)
+```
+
+# basic Import
+#to import a file just simply use this template:
+#Import = read.csv('Pathname')
+#Import
+
+```{r}
+advertiser <- read_csv('/Users/nikodem/Desktop/dataset/advertiser.csv',col_names = TRUE)
+advertiser
+
+campaigns <- read_csv('/Users/nikodem/Desktop/dataset/campaigns.csv',col_names = TRUE)
+campaigns
+
+clicks <- read_csv('/Users/nikodem/Desktop/dataset/clicks.csv',col_names = TRUE)
+clicks
+
+conversions <- read_csv('/Users/nikodem/Desktop/dataset/conversions.csv',col_names = TRUE)
+conversions
+
+impressions <- read_csv('/Users/nikodem/Desktop/dataset/impressions.csv',col_names = TRUE)
+impressions
+```
+
+#Count Function
+this function just counts the number of observations found within the csv's this is done before joining as more information can be gathered and transferred over
+
+```{r}
+count_clicks <- clicks %>% count("campaign_id")
+colnames(count_clicks) <- c("campaign_id","clicks")
+view(count_clicks)
+
+count_conversions <- conversions %>% count("campaign_id")
+colnames(count_conversions) <- c("campaign_id","conversion")
+view(count_conversions)
+
+count_impressions <- impressions %>% count("campaign_id")
+colnames(count_impressions) <-c("campaign_id","impressions")
+view(count_impressions)
+
+```
+
+#join
+let's join our brand new count tables mader above into a singular table called join
+```{r}
+
+join <- inner_join(advertiser,campaigns, by = c("ID" = "advertiser_id"))
+colnames(join) <- c("advertiser_id","company","campaign_id","campaign","budget")
+
+count_clicks$campaign_id <- as.character(count_clicks$campaign_id)
+count_conversions$campaign_id <- as.character(count_conversions$campaign_id)
+count_impressions$campaign_id <- as.character(count_impressions$campaign_id)
+  
+join$campaign_id <- as.character(join$campaign_id)
+
+str(join)
+
+join <- left_join(join, count_impressions, by =c("campaign_id"))
+join <- left_join(join, count_clicks, by =c("campaign_id"))
+join <- left_join(join, count_conversions, by =c("campaign_id"))
+
+view(join)
+```
+i failed to get campaign_id as character somehow so i needed to force convert it to a character from a double i don't know why that happened but it messed up my whole assignment.
+#join test/practice & info
+#x <- tribble( ~key, ~val_x,1,"x1",2,"x2",3,"x3")
+#y <- tribble( ~key, ~val_y,1,"y1",2,"y2",4,"y3")
+
+#res <- inner_join(x, y, by = "key")
+
+#resLeft <- left_join(x, y, by = "key")
+
+#resRight <- right_join(x, y, by = "key")
+
+#resFull <- full_join(x, y, by = "key")
+
+#resSemi <- semi_join(x, y, by = "key")
+
+#resAnti <- anti_join(x, y, by = "key")
+
+the next step in my journey is looking if there is any missing data and if so substituting that missing data
+```{r}
+is.na(advertiser)
+is.na(clicks)
+is.na(conversions)
+is.na(campaigns)
+is.na(impressions)
+```
+since i am receiving error's as n/a lets change those to 0 from n/a to still make my data work when plotting
+```{r}
+join$impressions[which(is.na(join$impressions))]<- 0
+join$clicks[which(is.na(join$clicks))]<- 0
+join$conversion[which(is.na(join$conversion))]<- 0
+view(join)
+```
+The final stage of this project is analysis
+the analysis i will be performing is companies and campaigns to their budget
+```{r}
+ggplot(data=join, aes(x=campaign, y=budget)) +
+  geom_bar(stat="identity", width=0.75, fill = 'blue') + ggtitle("Budget per Campaign")
+
+ggplot(data=join, aes(x=company, y=budget)) +
+  geom_bar(stat="identity", width=0.75, fill = 'purple') + ggtitle("Budget per company for campaigns")
+```
+finally i wanted to graphs clicks,impressions and conversions and compare to one another sadly my join didn't do correctly what i wanted and 
+```{r}
+
+ggplot(data=join, aes(x=count_clicks$clicks, y=count_impressions$impressions)) +
+  geom_bar(stat="identity", width=0.5, fill = "darkblue") + ggtitle("Impressions per Campaign")
+
+
+
+```
+
+sadly i count compare the two due to all my time spent studying for exams, i know excuses are excuses but apologies for the rushed test
